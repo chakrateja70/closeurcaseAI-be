@@ -14,6 +14,9 @@ class Settings:
         self.SUMMARIZATION_MODEL: str = "gpt-4.1-mini"
         self.DETECTION_MODEL: str = "gpt-4o-mini"
 
+        self.SWAGGER_USERNAME: str = self._get_required("SWAGGER_USERNAME")
+        self.SWAGGER_PASSWORD: str = self._get_required("SWAGGER_PASSWORD")
+
         self.LANGFUSE_PUBLIC_KEY: str | None = os.getenv("LANGFUSE_PUBLIC_KEY")
         self.LANGFUSE_SECRET_KEY: str | None = os.getenv("LANGFUSE_SECRET_KEY")
         self.LANGFUSE_HOST: str = "https://cloud.langfuse.com"
