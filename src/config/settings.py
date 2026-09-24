@@ -13,6 +13,7 @@ class Settings:
         self.OPENAI_API_KEY: str = self._get_required("OPENAI_API_KEY")
         self.SUMMARIZATION_MODEL: str = "gpt-4.1-mini"
         self.DETECTION_MODEL: str = "gpt-4o-mini"
+        self.EXTRACTION_MODEL: str = "gpt-4.1-mini"
 
         self.SWAGGER_USERNAME: str = self._get_required("SWAGGER_USERNAME")
         self.SWAGGER_PASSWORD: str = self._get_required("SWAGGER_PASSWORD")

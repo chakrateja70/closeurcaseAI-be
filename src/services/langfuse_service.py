@@ -3,9 +3,9 @@ from langfuse.langchain import CallbackHandler
 
 from src.config.settings import xsettings
 
-xlangfuse_client: Langfuse | None = None
+langfuse_client: Langfuse | None = None
 if xsettings.LANGFUSE_PUBLIC_KEY and xsettings.LANGFUSE_SECRET_KEY:
-    xlangfuse_client = Langfuse(
+    langfuse_client = Langfuse(
         public_key=xsettings.LANGFUSE_PUBLIC_KEY,
         secret_key=xsettings.LANGFUSE_SECRET_KEY,
         host=xsettings.LANGFUSE_HOST,
@@ -14,6 +14,6 @@ if xsettings.LANGFUSE_PUBLIC_KEY and xsettings.LANGFUSE_SECRET_KEY:
 
 def get_langfuse_callbacks() -> list:
     """Return LangChain callbacks for Langfuse tracing, or [] if not configured."""
-    if xlangfuse_client is None:
+    if langfuse_client is None:
         return []
     return [CallbackHandler()]

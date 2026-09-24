@@ -29,6 +29,18 @@ class LLMService:
             callbacks=get_langfuse_callbacks(),
         )
 
+    @staticmethod
+    def get_case_extraction_model(
+        model: str = xsettings.EXTRACTION_MODEL, max_tokens: int = 30000
+    ) -> ChatOpenAI:
+        """Initialize LLM model for case extraction."""
+        return ChatOpenAI(
+            model=model,
+            api_key=SecretStr(xsettings.OPENAI_API_KEY),
+            max_completion_tokens=max_tokens,
+            callbacks=get_langfuse_callbacks(),
+        )
+
 
 # Global singleton instance (or call directly via LLMService.get_summarization_model())
 xllm_service = LLMService()

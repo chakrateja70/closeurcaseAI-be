@@ -1,5 +1,6 @@
 import base64
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 import httpx
@@ -7,6 +8,8 @@ import httpx
 from src.core.exceptions import BadRequestAPIException, GatewayTimeoutAPIException
 
 MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+DOCUMENT_EXTENSIONS = {".pdf", ".doc", ".docx"}
 
 
 async def build_image_part(client: httpx.AsyncClient, url: str) -> dict:
@@ -43,3 +46,28 @@ async def build_file_part(client: httpx.AsyncClient, url: str) -> dict:
             "file_data": f"data:application/octet-stream;base64,{encoded}",
         },
     }
+
+
+async def build_content_parts(
+    client: httpx.AsyncClient, case_text: str | None, urls: list | None
+) -> list[str | dict[str, Any]]:
+    """Build LLM message content parts from case text and/or document/image URLs."""
+    content_parts: list[str | dict[str, Any]] = []
+
+    if case_text:
+        content_parts.append({"type": "text", "text": f"Case Text:\n{case_text}"})
+
+    for url in urls or []:
+        url = str(url)
+        ext = Path(urlparse(url).path).suffix.lower()
+        if ext in IMAGE_EXTENSIONS:
+            content_parts.append(await build_image_part(client, url))
+        elif ext in DOCUMENT_EXTENSIONS:
+            content_parts.append(await build_file_part(client, url))
+        else:
+            raise BadRequestAPIException(
+                f"Unsupported file type '{ext or 'unknown'}' for URL: {url}. "
+                f"Supported extensions: {sorted(IMAGE_EXTENSIONS | DOCUMENT_EXTENSIONS)}"
+            )
+
+    return content_parts

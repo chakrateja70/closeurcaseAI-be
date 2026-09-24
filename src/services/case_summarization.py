@@ -1,7 +1,4 @@
 import json
-from pathlib import Path
-from typing import Any
-from urllib.parse import urlparse
 
 import httpx
 import openai
@@ -15,31 +12,12 @@ from src.core.exceptions import (
 )
 from src.prompts.case_summarization import SUMMARIZATION_SYSTEM_PROMPT
 from src.services.llm_service import xllm_service
-from src.utils.helper import build_file_part, build_image_part
-
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
-DOCUMENT_EXTENSIONS = {".pdf", ".doc", ".docx"}
+from src.utils.helper import build_content_parts
 
 
 async def generate_summary(case_text: str | None = None, urls: list | None = None) -> dict:
-    content_parts: list[str | dict[str, Any]] = []
-
-    if case_text:
-        content_parts.append({"type": "text", "text": f"Case Text:\n{case_text}"})
-
     async with httpx.AsyncClient(timeout=10) as client:
-        for url in urls or []:
-            url = str(url)
-            ext = Path(urlparse(url).path).suffix.lower()
-            if ext in IMAGE_EXTENSIONS:
-                content_parts.append(await build_image_part(client, url))
-            elif ext in DOCUMENT_EXTENSIONS:
-                content_parts.append(await build_file_part(client, url))
-            else:
-                raise BadRequestAPIException(
-                    f"Unsupported file type '{ext or 'unknown'}' for URL: {url}. "
-                    f"Supported extensions: {sorted(IMAGE_EXTENSIONS | DOCUMENT_EXTENSIONS)}"
-                )
+        content_parts = await build_content_parts(client, case_text, urls)
 
     messages: LanguageModelInput = [
         ("system", SUMMARIZATION_SYSTEM_PROMPT),
