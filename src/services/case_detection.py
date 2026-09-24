@@ -42,6 +42,8 @@ async def detect_case(user_input: str) -> dict:
     except openai.APIConnectionError as e:
         raise ServiceUnavailableAPIException("Could not reach the detection model") from e
 
+    if not isinstance(response.content, str):
+        raise BadRequestAPIException("Detection model returned an unexpected response format")
     result = json.loads(response.content)
     category_id = result.get("categoryId")
     subcategory_id = result.get("subCategoryId")

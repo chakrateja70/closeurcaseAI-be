@@ -1,9 +1,11 @@
 import json
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 import httpx
 import openai
+from langchain_core.language_models import LanguageModelInput
 
 from src.core.exceptions import (
     BadRequestAPIException,
@@ -20,7 +22,7 @@ DOCUMENT_EXTENSIONS = {".pdf", ".doc", ".docx"}
 
 
 async def generate_summary(case_text: str | None = None, urls: list | None = None) -> dict:
-    content_parts = []
+    content_parts: list[str | dict[str, Any]] = []
 
     if case_text:
         content_parts.append({"type": "text", "text": f"Case Text:\n{case_text}"})
@@ -39,7 +41,7 @@ async def generate_summary(case_text: str | None = None, urls: list | None = Non
                     f"Supported extensions: {sorted(IMAGE_EXTENSIONS | DOCUMENT_EXTENSIONS)}"
                 )
 
-    messages = [
+    messages: LanguageModelInput = [
         ("system", SUMMARIZATION_SYSTEM_PROMPT),
         ("user", content_parts),
     ]
@@ -56,4 +58,6 @@ async def generate_summary(case_text: str | None = None, urls: list | None = Non
     except openai.APIConnectionError as e:
         raise ServiceUnavailableAPIException("Could not reach the summarization model") from e
 
+    if not isinstance(response.content, str):
+        raise BadRequestAPIException("Summarization model returned an unexpected response format")
     return json.loads(response.content)

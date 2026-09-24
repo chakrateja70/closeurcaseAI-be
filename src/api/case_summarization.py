@@ -42,5 +42,5 @@ class SummarizeCaseRequest(BaseModel):
 async def summarize_case(req: SummarizeCaseRequest):
     summary = await generate_summary(case_text=req.case_text, urls=req.urls)
     return SummarizeCaseResponse(
-        status_code=200, message="Case summarized successfully", data=summary
+        status_code=200, message="Case summarized successfully", data=CaseSummary(**summary)
     )

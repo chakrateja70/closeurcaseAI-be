@@ -32,9 +32,10 @@ class DetectCaseResponse(BaseModel):
 @router.post("/detect-case", response_model=DetectCaseResponse)
 async def detect_case_route(req: DetectCaseRequest):
     result = await detect_case(req.query)
+    data = DetectCaseData(**result)
     message = (
         "Case category detected successfully"
-        if result["categoryId"]
+        if data.categoryId
         else "No matching case category found"
     )
-    return DetectCaseResponse(status_code=200, message=message, data=result)
+    return DetectCaseResponse(status_code=200, message=message, data=data)
