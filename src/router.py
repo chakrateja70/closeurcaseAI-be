@@ -6,4 +6,3 @@ api_router = APIRouter()
 
 api_router.include_router(case_detection.router)
 api_router.include_router(case_summarization.router)
-

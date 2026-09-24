@@ -1,0 +1,406 @@
+{
+  "data": [
+    {
+      "id": "cat_1",
+      "name": "Criminal Defense",
+      "subCategories": [
+        {
+          "id": "spec_1_1",
+          "categoryId": "cat_1",
+          "name": "Anticipatory Bail"
+        },
+        {
+          "id": "spec_1_2",
+          "categoryId": "cat_1",
+          "name": "Criminal"
+        },
+        {
+          "id": "spec_1_3",
+          "categoryId": "cat_1",
+          "name": "Cyber Crime"
+        },
+        {
+          "id": "spec_1_4",
+          "categoryId": "cat_1",
+          "name": "Fraud Case"
+        },
+        {
+          "id": "spec_1_5",
+          "categoryId": "cat_1",
+          "name": "Litigation"
+        },
+        {
+          "id": "spec_1_6",
+          "categoryId": "cat_1",
+          "name": "POCSO Act"
+        },
+        {
+          "id": "spec_1_7",
+          "categoryId": "cat_1",
+          "name": "Anti Corruption"
+        },
+        {
+          "id": "spec_1_8",
+          "categoryId": "cat_1",
+          "name": "PMLA"
+        }
+      ]
+    },
+    {
+      "id": "cat_2",
+      "name": "Corporate Law",
+      "subCategories": [
+        {
+          "id": "spec_2_1",
+          "categoryId": "cat_2",
+          "name": "Arbitration"
+        },
+        {
+          "id": "spec_2_2",
+          "categoryId": "cat_2",
+          "name": "Startup"
+        },
+        {
+          "id": "spec_2_3",
+          "categoryId": "cat_2",
+          "name": "Corporate"
+        },
+        {
+          "id": "spec_2_4",
+          "categoryId": "cat_2",
+          "name": "Breach of Contract"
+        },
+        {
+          "id": "spec_2_5",
+          "categoryId": "cat_2",
+          "name": "NCLT"
+        },
+        {
+          "id": "spec_2_6",
+          "categoryId": "cat_2",
+          "name": "Bankruptcy / Insolvency"
+        },
+        {
+          "id": "spec_2_7",
+          "categoryId": "cat_2",
+          "name": "Patent"
+        },
+        {
+          "id": "spec_2_8",
+          "categoryId": "cat_2",
+          "name": "Media and Entertainment"
+        },
+        {
+          "id": "spec_2_9",
+          "categoryId": "cat_2",
+          "name": "Trademark & Copyright"
+        },
+        {
+          "id": "spec_2_10",
+          "categoryId": "cat_2",
+          "name": "Documentation"
+        }
+      ]
+    },
+    {
+      "id": "cat_3",
+      "name": "Family Law",
+      "subCategories": [
+        {
+          "id": "spec_3_1",
+          "categoryId": "cat_3",
+          "name": "Wills / Trusts"
+        },
+        {
+          "id": "spec_3_2",
+          "categoryId": "cat_3",
+          "name": "Child Custody"
+        },
+        {
+          "id": "spec_3_3",
+          "categoryId": "cat_3",
+          "name": "Muslim Law"
+        },
+        {
+          "id": "spec_3_4",
+          "categoryId": "cat_3",
+          "name": "Domestic Violence"
+        },
+        {
+          "id": "spec_3_5",
+          "categoryId": "cat_3",
+          "name": "Succession Certificate"
+        },
+        {
+          "id": "spec_3_6",
+          "categoryId": "cat_3",
+          "name": "Divorce"
+        },
+        {
+          "id": "spec_3_7",
+          "categoryId": "cat_3",
+          "name": "Family"
+        },
+        {
+          "id": "spec_3_8",
+          "categoryId": "cat_3",
+          "name": "Court Marriage"
+        },
+        {
+          "id": "spec_3_9",
+          "categoryId": "cat_3",
+          "name": "Dowry Case"
+        }
+      ]
+    },
+    {
+      "id": "cat_4",
+      "name": "Banking & Finance",
+      "subCategories": [
+        {
+          "id": "spec_4_1",
+          "categoryId": "cat_4",
+          "name": "Cheque Bounce"
+        },
+        {
+          "id": "spec_4_2",
+          "categoryId": "cat_4",
+          "name": "Recovery"
+        },
+        {
+          "id": "spec_4_3",
+          "categoryId": "cat_4",
+          "name": "Tax"
+        },
+        {
+          "id": "spec_4_4",
+          "categoryId": "cat_4",
+          "name": "Banking / Finance"
+        },
+        {
+          "id": "spec_4_5",
+          "categoryId": "cat_4",
+          "name": "GST"
+        },
+        {
+          "id": "spec_4_6",
+          "categoryId": "cat_4",
+          "name": "Customs & Central Excise"
+        }
+      ]
+    },
+    {
+      "id": "cat_5",
+      "name": "Consumer Law",
+      "subCategories": [
+        {
+          "id": "spec_5_1",
+          "categoryId": "cat_5",
+          "name": "Insurance"
+        },
+        {
+          "id": "spec_5_2",
+          "categoryId": "cat_5",
+          "name": "Medical Negligence"
+        },
+        {
+          "id": "spec_5_3",
+          "categoryId": "cat_5",
+          "name": "Motor Accident"
+        },
+        {
+          "id": "spec_5_4",
+          "categoryId": "cat_5",
+          "name": "Consumer Court"
+        }
+      ]
+    },
+    {
+      "id": "cat_6",
+      "name": "Higher Courts",
+      "subCategories": [
+        {
+          "id": "spec_6_1",
+          "categoryId": "cat_6",
+          "name": "Armed Forces Tribunal"
+        },
+        {
+          "id": "spec_6_2",
+          "categoryId": "cat_6",
+          "name": "Supreme Court"
+        },
+        {
+          "id": "spec_6_3",
+          "categoryId": "cat_6",
+          "name": "High Court"
+        }
+      ]
+    },
+    {
+      "id": "cat_7",
+      "name": "International Law",
+      "subCategories": [
+        {
+          "id": "spec_7_1",
+          "categoryId": "cat_7",
+          "name": "Immigration"
+        },
+        {
+          "id": "spec_7_2",
+          "categoryId": "cat_7",
+          "name": "International Law"
+        },
+        {
+          "id": "spec_7_3",
+          "categoryId": "cat_7",
+          "name": "NRI"
+        }
+      ]
+    },
+    {
+      "id": "cat_8",
+      "name": "Labour & Civil Matters",
+      "subCategories": [
+        {
+          "id": "spec_8_1",
+          "categoryId": "cat_8",
+          "name": "Labour & Service"
+        },
+        {
+          "id": "spec_8_2",
+          "categoryId": "cat_8",
+          "name": "R.T.I"
+        },
+        {
+          "id": "spec_8_3",
+          "categoryId": "cat_8",
+          "name": "Civil"
+        }
+      ]
+    },
+    {
+      "id": "cat_9",
+      "name": "Property Law",
+      "subCategories": [
+        {
+          "id": "spec_9_1",
+          "categoryId": "cat_9",
+          "name": "Landlord/Tenant"
+        },
+        {
+          "id": "spec_9_2",
+          "categoryId": "cat_9",
+          "name": "Property"
+        },
+        {
+          "id": "spec_9_3",
+          "categoryId": "cat_9",
+          "name": "RERA"
+        }
+      ]
+    },
+    {
+      "id": "cat_10",
+      "name": "Cyber",
+      "subCategories": [
+        {
+          "id": "spec_10_1",
+          "categoryId": "cat_10",
+          "name": "Cyber Crime Complaint"
+        },
+        {
+          "id": "spec_10_2",
+          "categoryId": "cat_10",
+          "name": "Online Harassment"
+        },
+        {
+          "id": "spec_10_3",
+          "categoryId": "cat_10",
+          "name": "Financial Cyber Fraud"
+        },
+        {
+          "id": "spec_10_4",
+          "categoryId": "cat_10",
+          "name": "Data Theft & Privacy"
+        },
+        {
+          "id": "spec_10_5",
+          "categoryId": "cat_10",
+          "name": "IT Act Offenses"
+        },
+        {
+          "id": "spec_10_6",
+          "categoryId": "cat_10",
+          "name": "Social Media Impersonation"
+        }
+      ]
+    },
+    {
+      "id": "cat_11",
+      "name": "Tax",
+      "subCategories": [
+        {
+          "id": "spec_11_1",
+          "categoryId": "cat_11",
+          "name": "Income Tax Appeals"
+        },
+        {
+          "id": "spec_11_2",
+          "categoryId": "cat_11",
+          "name": "GST Disputes & Filings"
+        },
+        {
+          "id": "spec_11_3",
+          "categoryId": "cat_11",
+          "name": "Customs & Central Excise"
+        },
+        {
+          "id": "spec_11_4",
+          "categoryId": "cat_11",
+          "name": "Tax Assessment Notices"
+        },
+        {
+          "id": "spec_11_5",
+          "categoryId": "cat_11",
+          "name": "Cheque Bounce (Sec 138)"
+        },
+        {
+          "id": "spec_11_6",
+          "categoryId": "cat_11",
+          "name": "Debt Recovery Tribunal (DRT)"
+        }
+      ]
+    },
+    {
+      "id": "cat_12",
+      "name": "Environmental",
+      "subCategories": [
+        {
+          "id": "spec_12_1",
+          "categoryId": "cat_12",
+          "name": "National Green Tribunal (NGT)"
+        },
+        {
+          "id": "spec_12_2",
+          "categoryId": "cat_12",
+          "name": "Pollution Control Board Matters"
+        },
+        {
+          "id": "spec_12_3",
+          "categoryId": "cat_12",
+          "name": "Environmental Impact Clearance"
+        },
+        {
+          "id": "spec_12_4",
+          "categoryId": "cat_12",
+          "name": "Forest & Wildlife Regulations"
+        },
+        {
+          "id": "spec_12_5",
+          "categoryId": "cat_12",
+          "name": "Waste Management Compliance"
+        }
+      ]
+    }
+  ]
+}

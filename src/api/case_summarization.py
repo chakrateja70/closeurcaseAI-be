@@ -7,13 +7,14 @@ router = APIRouter(prefix="/summarization", tags=["case-summarization"])
 
 
 class CaseSummary(BaseModel):
-    brief: str
+    summary: str
     key_points: list[str]
 
 
 class SummarizeCaseResponse(BaseModel):
+    status_code: int
     message: str
-    summary: CaseSummary
+    data: CaseSummary
 
 
 class SummarizeCaseRequest(BaseModel):
@@ -40,4 +41,6 @@ class SummarizeCaseRequest(BaseModel):
 @router.post("/summarize-case", response_model=SummarizeCaseResponse)
 async def summarize_case(req: SummarizeCaseRequest):
     summary = await generate_summary(case_text=req.case_text, urls=req.urls)
-    return SummarizeCaseResponse(message="Case summarized successfully", summary=summary)
+    return SummarizeCaseResponse(
+        status_code=200, message="Case summarized successfully", data=summary
+    )
