@@ -42,3 +42,10 @@ Open `http://localhost:8089` to set users/spawn rate and start, or run headless 
 - `POST /summarization/summarize-case` — summarize a case from text and/or document URLs
 
 See [CLAUDE.md](CLAUDE.md) for architecture and conventions.
+
+
+
+sonarqube:
+
+docker ps -a
+docker run -d --name sonarqube-testing -p 9000:9000 sonarqube:community
