@@ -27,6 +27,15 @@ uv run ruff format .
 uv run pytest
 ```
 
+## Load testing
+
+```sh
+# server must already be running (see Run above)
+uv run locust -f loadtests/locustfile.py --host http://localhost:8000
+```
+
+Open `http://localhost:8089` to set users/spawn rate and start, or run headless with `--headless -u 10 -r 2 -t 1m`. Each request calls the real OpenAI API — this costs money, so keep user counts modest.
+
 ## Features
 
 - `POST /detection/detect-case` — classify a legal query into a category/subcategory
