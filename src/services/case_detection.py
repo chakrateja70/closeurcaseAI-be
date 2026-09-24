@@ -9,13 +9,14 @@ from src.core.exceptions import (
     ServiceUnavailableAPIException,
     TooManyRequestsAPIException,
 )
-from src.prompts.case_detection import DETECTION_SYSTEM_PROMPT
+from src.prompts.case_detection import build_detection_system_prompt
 from src.services.llm_service import xllm_service
 
 MASTER_DATA_PATH = (
     Path(__file__).resolve().parent.parent.parent / "master_data" / "case_detection.json"
 )
 CATEGORIES = json.loads(MASTER_DATA_PATH.read_text(encoding="utf-8"))["data"]
+DETECTION_SYSTEM_PROMPT = build_detection_system_prompt(json.dumps(CATEGORIES))
 
 # Lookups for validating/resolving the LLM's chosen ids.
 CATEGORY_BY_ID = {cat["id"]: cat for cat in CATEGORIES}
@@ -26,7 +27,7 @@ async def detect_case(user_input: str) -> dict:
     """Detect the category and subcategory of a legal query using LLM."""
     messages = [
         ("system", DETECTION_SYSTEM_PROMPT),
-        ("user", f"Categories:\n{json.dumps(CATEGORIES)}\n\nUser Query:\n{user_input}"),
+        ("user", user_input),
     ]
 
     model = xllm_service.get_detection_model().bind(response_format={"type": "json_object"})
