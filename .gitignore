@@ -39,3 +39,4 @@ Thumbs.db
 
 # local demo with real case data - never commit
 scripts/chunk_demo.py
+scripts/eval_retrieval.py

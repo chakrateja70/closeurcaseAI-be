@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import math
 from datetime import UTC, datetime
@@ -17,7 +18,11 @@ from src.core.exceptions import (
     TooManyRequestsAPIException,
 )
 from src.db.pinecone import CASES_NAMESPACE, get_index, pinecone_client
-from src.prompts.case_ingestion import EXTRACT_SYSTEM_PROMPT
+from src.prompts.case_ingestion import (
+    ANSWER_SYSTEM_PROMPT,
+    EXTRACT_SYSTEM_PROMPT,
+    NOT_FOUND_ANSWER,
+)
 from src.services.llm_service import xllm_service
 from src.utils.helper import build_content_parts
 
@@ -26,12 +31,13 @@ logger = logging.getLogger(__name__)
 SPARSE_MODEL = "pinecone-sparse-english-v0"
 SPARSE_BATCH_SIZE = 96  # hosted sparse model's max inputs per request
 UPSERT_BATCH_SIZE = 100  # keeps each request under Pinecone's 2MB limit
-HYBRID_ALPHA = 0.5  # 1.0 = pure dense (semantic), 0.0 = pure sparse (keyword)
-# text-embedding-3-small question->passage cosine for relevant chunks is ~0.3-0.5, rarely > 0.6
+# 1.0 = pure dense (semantic), 0.0 = pure sparse (keyword). Sparse scores run ~5-10x larger
+# than dense cosine, so alpha > 0.5 is needed to balance them. Tune with scripts/eval_retrieval.py
+HYBRID_ALPHA = 0.9
 MIN_DENSE_SIMILARITY = 0.3  # drop matches whose dense cosine similarity is below this
 
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000, chunk_overlap=200, length_function=len, is_separator_regex=False
+    chunk_size=2000, chunk_overlap=200, length_function=len, is_separator_regex=False
 )
 
 
@@ -259,3 +265,39 @@ async def search_chunks(query: str, case_id: str, top_k: int = 15) -> list[dict]
     print(f"search_chunks: {len(chunks)} matches for case_id={case_id}, query='{query}'")
     print(f"search_chunks: {chunks=}")
     return chunks
+
+
+async def answer_query(case_id: str, query: str) -> dict:
+    """Retrieve the case's relevant chunks and answer from them, citing only used sources."""
+    chunks = await search_chunks(query, case_id=case_id)
+    if not chunks:
+        return {"answer": NOT_FOUND_ANSWER, "sources": []}
+
+    context = "\n\n".join(f"[{c['document_name']}]\n{c['text']}" for c in chunks)
+    messages: LanguageModelInput = [
+        ("system", ANSWER_SYSTEM_PROMPT),
+        ("user", f"Context:\n{context}\n\nQuestion: {query}"),
+    ]
+    model = xllm_service.get_case_extraction_model().bind(response_format={"type": "json_object"})
+    try:
+        response = await model.ainvoke(messages)
+    except openai.RateLimitError as e:
+        raise TooManyRequestsAPIException() from e
+    except openai.BadRequestError as e:
+        raise BadRequestAPIException(str(e)) from e
+    except openai.APITimeoutError as e:
+        raise GatewayTimeoutAPIException() from e
+    except openai.APIConnectionError as e:
+        raise ServiceUnavailableAPIException("Could not reach the answer model") from e
+
+    try:
+        result = json.loads(response.content)
+    except (TypeError, json.JSONDecodeError) as e:
+        raise BadRequestAPIException("Answer model returned an unexpected response format") from e
+
+    answer = result.get("answer") or NOT_FOUND_ANSWER
+    if answer == NOT_FOUND_ANSWER:
+        return {"answer": answer, "sources": []}
+    # Keep only cited names that were really retrieved, so the model can't invent a source.
+    retrieved = {c["document_name"] for c in chunks}
+    return {"answer": answer, "sources": [s for s in result.get("sources", []) if s in retrieved]}
