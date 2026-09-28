@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from pydantic import SecretStr
 
 from src.config.settings import xsettings
@@ -39,6 +39,14 @@ class LLMService:
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
             max_completion_tokens=max_tokens,
             callbacks=get_langfuse_callbacks(),
+        )
+
+    @staticmethod
+    def get_embedding_model(model: str = xsettings.EMBEDDING_MODEL) -> OpenAIEmbeddings:
+        """Initialize LLM model for embeddings."""
+        return OpenAIEmbeddings(
+            model=model,
+            api_key=SecretStr(xsettings.OPENAI_API_KEY),
         )
 
 

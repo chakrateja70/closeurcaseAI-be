@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, Field, HttpUrl, model_validator
 
-from src.services.case_ingestion import xragservice
+from src.services.case_ingestion import delete_case as delete_case_service
+from src.services.case_ingestion import ingest_case as ingest_case_service
 
 router = APIRouter(prefix="/case-ingestion", tags=["case-ingestion"])
 
@@ -35,5 +36,11 @@ class IngestCaseResponse(BaseModel):
 
 @router.post("/ingest-case", response_model=IngestCaseResponse)
 async def ingest_case(req: IngestCaseRequest) -> IngestCaseResponse:
-    await xragservice.load_and_extract(case_text=req.case_text, urls=req.urls)
+    await ingest_case_service(case_id=req.case_id, case_text=req.case_text, urls=req.urls)
     return IngestCaseResponse(status_code=200, message="Case ingested successfully")
+
+
+@router.delete("/delete-case/{case_id}", response_model=IngestCaseResponse)
+async def delete_case(case_id: str) -> IngestCaseResponse:
+    await delete_case_service(case_id)
+    return IngestCaseResponse(status_code=200, message="Case deleted successfully")

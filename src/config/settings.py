@@ -14,9 +14,13 @@ class Settings:
         self.SUMMARIZATION_MODEL: str = "gpt-4.1-mini"
         self.DETECTION_MODEL: str = "gpt-4o-mini"
         self.EXTRACTION_MODEL: str = "gpt-4.1-mini"
+        self.EMBEDDING_MODEL: str = "text-embedding-3-small"
 
         self.SWAGGER_USERNAME: str = self._get_required("SWAGGER_USERNAME")
         self.SWAGGER_PASSWORD: str = self._get_required("SWAGGER_PASSWORD")
+
+        self.PINECONE_API_KEY: str = self._get_required("PINECONE_API_KEY")
+        self.PINECONE_INDEX_NAME: str = self._get_required("PINECONE_INDEX_NAME")
 
         self.LANGFUSE_PUBLIC_KEY: str | None = os.getenv("LANGFUSE_PUBLIC_KEY")
         self.LANGFUSE_SECRET_KEY: str | None = os.getenv("LANGFUSE_SECRET_KEY")
