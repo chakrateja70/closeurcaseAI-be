@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from src.services.case_detection import detect_case
+from src.services.case_detection import OTHER_CATEGORY_ID, detect_case
 
 router = APIRouter(prefix="/detection", tags=["case-detection"])
 
@@ -17,8 +17,8 @@ class DetectCaseRequest(BaseModel):
 
 
 class DetectCaseData(BaseModel):
-    categoryId: str | None
-    categoryName: str | None
+    categoryId: str
+    categoryName: str
     subCategoryId: str | None
     subCategoryName: str | None
 
@@ -35,7 +35,7 @@ async def detect_case_route(req: DetectCaseRequest):
     data = DetectCaseData(**result)
     message = (
         "Case category detected successfully"
-        if data.categoryId
+        if data.categoryId != OTHER_CATEGORY_ID
         else "No matching case category found"
     )
     return DetectCaseResponse(status_code=200, message=message, data=data)

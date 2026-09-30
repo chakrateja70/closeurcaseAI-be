@@ -36,7 +36,7 @@ def test_detect_case_returns_matched_category(mock_llm_service):
 
 
 @patch("src.services.case_detection.xllm_service")
-def test_detect_case_no_match_returns_nulls(mock_llm_service):
+def test_detect_case_no_match_falls_back_to_other(mock_llm_service):
     mock_llm_service.get_detection_model.return_value = _mock_model(
         {"categoryId": None, "subCategoryId": None}
     )
@@ -45,8 +45,13 @@ def test_detect_case_no_match_returns_nulls(mock_llm_service):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["data"]["categoryId"] is None
-    assert body["data"]["subCategoryId"] is None
+    assert body["message"] == "No matching case category found"
+    assert body["data"] == {
+        "categoryId": "cat_other",
+        "categoryName": "Other",
+        "subCategoryId": "spec_other",
+        "subCategoryName": "Other",
+    }
 
 
 @patch("src.services.case_detection.xllm_service")

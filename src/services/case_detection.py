@@ -21,6 +21,9 @@ DETECTION_SYSTEM_PROMPT = build_detection_system_prompt(json.dumps(CATEGORIES))
 # Lookups for validating/resolving the LLM's chosen ids.
 CATEGORY_BY_ID = {cat["id"]: cat for cat in CATEGORIES}
 SUBCATEGORY_BY_ID = {sub["id"]: sub for cat in CATEGORIES for sub in cat["subCategories"]}
+# Fallback when the query matches no specific category.
+OTHER_CATEGORY_ID = "cat_other"
+OTHER_SUBCATEGORY_ID = "spec_other"
 
 
 async def detect_case(user_input: str) -> dict:
@@ -56,10 +59,13 @@ async def detect_case(user_input: str) -> dict:
         raise BadRequestAPIException(f"Model returned unknown categoryId: {category_id}")
     if subcategory_id and not subcategory:
         raise BadRequestAPIException(f"Model returned unknown subCategoryId: {subcategory_id}")
+    if not category:
+        category = CATEGORY_BY_ID[OTHER_CATEGORY_ID]
+        subcategory = SUBCATEGORY_BY_ID[OTHER_SUBCATEGORY_ID]
 
     return {
-        "categoryId": category["id"] if category else None,
-        "categoryName": category["name"] if category else None,
+        "categoryId": category["id"],
+        "categoryName": category["name"],
         "subCategoryId": subcategory["id"] if subcategory else None,
         "subCategoryName": subcategory["name"] if subcategory else None,
     }

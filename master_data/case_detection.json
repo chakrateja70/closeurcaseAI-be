@@ -401,6 +401,17 @@
           "name": "Waste Management Compliance"
         }
       ]
+    },
+    {
+      "id": "cat_other",
+      "name": "Other",
+      "subCategories": [
+        {
+          "id": "spec_other",
+          "categoryId": "cat_other",
+          "name": "Other"
+        }
+      ]
     }
   ]
 }
