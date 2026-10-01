@@ -56,7 +56,7 @@ class LLMService:
             model=model,
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
             use_responses_api=True,
-            reasoning={"effort": "medium", "mode": "standard"},
+            reasoning={"effort": "low", "mode": "standard"},
             verbosity="medium",
             model_kwargs={"prompt_cache_key": "counter-generation"},
             callbacks=get_langfuse_callbacks(),

@@ -206,7 +206,7 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
     return sum(x * y for x, y in zip(a, b, strict=True)) / norm if norm else 0.0
 
 
-async def search_chunks(query: str, case_id: str, top_k: int = 15) -> list[dict]:
+async def search_chunks(query: str, case_id: str, top_k: int = 10) -> list[dict]:
     """Hybrid search within one case: alpha-weighted dense + sparse, fused server-side.
     Matches whose dense cosine similarity is below MIN_DENSE_SIMILARITY are dropped."""
     dense_vectors, sparse_vectors = await asyncio.gather(
