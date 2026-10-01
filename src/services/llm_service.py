@@ -42,6 +42,17 @@ class LLMService:
         )
 
     @staticmethod
+    def get_counter_generation_model(
+        model: str = xsettings.COUNTER_GENERATION_MODEL
+    ) -> ChatOpenAI:
+        """Initialize LLM model for generating counter arguments."""
+        return ChatOpenAI(
+            model=model,
+            api_key=SecretStr(xsettings.OPENAI_API_KEY),
+            callbacks=get_langfuse_callbacks(),
+        )
+
+    @staticmethod
     def get_embedding_model(model: str = xsettings.EMBEDDING_MODEL) -> OpenAIEmbeddings:
         """Initialize LLM model for embeddings."""
         return OpenAIEmbeddings(
