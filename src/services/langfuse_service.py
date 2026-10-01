@@ -9,6 +9,8 @@ if xsettings.LANGFUSE_PUBLIC_KEY and xsettings.LANGFUSE_SECRET_KEY:
         public_key=xsettings.LANGFUSE_PUBLIC_KEY,
         secret_key=xsettings.LANGFUSE_SECRET_KEY,
         host=xsettings.LANGFUSE_HOST,
+        # Default 5s is too short to upload base64 documents attached to traces.
+        timeout=240,
     )
 
 

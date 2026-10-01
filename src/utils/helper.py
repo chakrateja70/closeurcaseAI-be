@@ -22,7 +22,8 @@ async def build_image_part(client: httpx.AsyncClient, url: str) -> dict:
     if content_length > MAX_FILE_SIZE_BYTES:
         raise BadRequestAPIException(f"File exceeds 15MB size limit: {url}")
 
-    return {"type": "image_url", "image_url": {"url": url}}
+    # high: scanned legal pages need full resolution to be read accurately.
+    return {"type": "image_url", "image_url": {"url": url, "detail": "medium"}}
 
 
 async def build_file_part(client: httpx.AsyncClient, url: str) -> dict:

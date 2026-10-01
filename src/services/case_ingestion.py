@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import math
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,8 +22,6 @@ from src.prompts.case_ingestion import (
 )
 from src.services.llm_service import xllm_service
 from src.utils.helper import build_content_parts
-
-logger = logging.getLogger(__name__)
 
 SPARSE_MODEL = "pinecone-sparse-english-v0"
 SPARSE_BATCH_SIZE = 96  # hosted sparse model's max inputs per request
@@ -62,8 +59,6 @@ async def extract_from_url(client: httpx.AsyncClient, url: str) -> str:
         raise BadRequestAPIException(
             f"Document too long to extract completely: {document_name(url)}"
         )
-    usage = response.usage_metadata or {}
-    logger.info("extracted %s, tokens: %s", document_name(url), usage.get("total_tokens"))
     return response.content
 
 
@@ -244,8 +239,6 @@ async def search_chunks(query: str, case_id: str, top_k: int = 15) -> list[dict]
                 "document_name": metadata.get("document_name"),
             }
         )
-    print(f"search_chunks: {len(chunks)} matches for case_id={case_id}, query='{query}'")
-    print(f"search_chunks: {chunks=}")
     return chunks
 
 

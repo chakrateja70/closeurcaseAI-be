@@ -17,7 +17,7 @@ class IngestCaseRequest(BaseModel):
     )
     case_text: str | None = Field(
         default=None,
-        max_length=30000,
+        max_length=600,
         description="Full text of the case (maximum 30,000 characters)",
     )
 

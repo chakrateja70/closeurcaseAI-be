@@ -39,15 +39,15 @@ class CaseApiUser(HttpUser):
     @task(2)
     def detect_case(self):
         self.client.post(
-            "/detection/detect-case",
+            "/ai/detection/detect-case",
             json={"query": next(self._queries)},
-            name="/detection/detect-case",
+            name="/ai/detection/detect-case",
         )
 
     @task(1)
     def summarize_case(self):
         self.client.post(
-            "/summarization/summarize-case",
+            "/ai/summarization/summarize-case",
             json={"case_text": SAMPLE_CASE_TEXT},
-            name="/summarization/summarize-case",
+            name="/ai/summarization/summarize-case",
         )

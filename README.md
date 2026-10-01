@@ -38,8 +38,8 @@ Open `http://localhost:8089` to set users/spawn rate and start, or run headless 
 
 ## Features
 
-- `POST /detection/detect-case` — classify a legal query into a category/subcategory
-- `POST /summarization/summarize-case` — summarize a case from text and/or document URLs
+- `POST /ai/detection/detect-case` — classify a legal query into a category/subcategory
+- `POST /ai/summarization/summarize-case` — summarize a case from text and/or document URLs
 
 See [CLAUDE.md](CLAUDE.md) for architecture and conventions.
 

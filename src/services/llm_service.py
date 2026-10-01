@@ -6,7 +6,11 @@ from src.services.langfuse_service import get_langfuse_callbacks
 
 
 class LLMService:
-    """Service to initialize task-specific LLM models."""
+    """Service to initialize task-specific LLM models.
+
+    OpenAI caches prompt prefixes of 1024+ tokens automatically; a stable per-task
+    prompt_cache_key routes same-prompt requests to the same cache for higher hit rates.
+    """
 
     @staticmethod
     def get_detection_model(model: str = xsettings.DETECTION_MODEL) -> ChatOpenAI:
@@ -14,6 +18,7 @@ class LLMService:
         return ChatOpenAI(
             model=model,
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
+            model_kwargs={"prompt_cache_key": "case-detection"},
             callbacks=get_langfuse_callbacks(),
         )
 
@@ -26,6 +31,7 @@ class LLMService:
             model=model,
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
             max_completion_tokens=max_tokens,
+            model_kwargs={"prompt_cache_key": "case-summarization"},
             callbacks=get_langfuse_callbacks(),
         )
 
@@ -38,15 +44,21 @@ class LLMService:
             model=model,
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
             max_completion_tokens=max_tokens,
+            model_kwargs={"prompt_cache_key": "case-extraction"},
             callbacks=get_langfuse_callbacks(),
         )
 
     @staticmethod
     def get_counter_generation_model(model: str = xsettings.COUNTER_GENERATION_MODEL) -> ChatOpenAI:
         """Initialize LLM model for generating counter arguments."""
+        # Responses API; text.format is set per call via response_format (json_object).
         return ChatOpenAI(
             model=model,
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
+            use_responses_api=True,
+            reasoning={"effort": "medium", "mode": "standard"},
+            verbosity="medium",
+            model_kwargs={"prompt_cache_key": "counter-generation"},
             callbacks=get_langfuse_callbacks(),
         )
 

@@ -11,9 +11,9 @@ class Settings:
     def __init__(self):
 
         self.OPENAI_API_KEY: str = self._get_required("OPENAI_API_KEY")
-        self.SUMMARIZATION_MODEL: str = "gpt-4.1-mini"
-        self.DETECTION_MODEL: str = "gpt-4o-mini"
-        self.EXTRACTION_MODEL: str = "gpt-4.1-mini"
+        self.SUMMARIZATION_MODEL: str = "gpt-5.4-mini"
+        self.DETECTION_MODEL: str = "gpt-5.4-nano"
+        self.EXTRACTION_MODEL: str = "gpt-5.4-mini"
         self.COUNTER_GENERATION_MODEL: str = "gpt-5.1"
         self.EMBEDDING_MODEL: str = "text-embedding-3-small"
 

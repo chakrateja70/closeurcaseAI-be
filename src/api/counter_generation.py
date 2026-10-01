@@ -10,13 +10,31 @@ class GenerateCounterRequest(BaseModel):
     url: HttpUrl = Field(description="One affidavit document or image URL")
 
 
+class LegalBasis(BaseModel):
+    act: str
+    provision: str
+    corresponding_provision: str | None = None
+    application: str
+    needs_verification: bool = False
+
+
+class CaseReference(BaseModel):
+    citation: str
+    proposition: str
+    source: str
+    needs_verification: bool = True
+
+
 class CounterArgument(BaseModel):
     paragraph_number: str
     argument: str
     counter_argument: str
+    legal_basis: list[LegalBasis] = []
+    case_references: list[CaseReference] = []
 
 
 class CounterGeneration(BaseModel):
+    applicable_law_regime: str | None = None
     counter_arguments: list[CounterArgument]
 
 

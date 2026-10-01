@@ -9,7 +9,7 @@ from src.utils.helper import build_content_parts
 
 async def generate_counter(url: str) -> dict:
     """Send the whole affidavit (document/image URL) to the LLM in a single call."""
-    async with httpx.AsyncClient(timeout=90) as client:
+    async with httpx.AsyncClient(timeout=240) as client:
         content_parts = await build_content_parts(client, None, [url])
 
     messages: LanguageModelInput = [
@@ -23,6 +23,14 @@ async def generate_counter(url: str) -> dict:
     with openai_errors("counter"):
         response = await model.ainvoke(messages)
 
-    if response.response_metadata.get("finish_reason") == "length":
+    # Responses API: truncation shows as status "incomplete"; content is a list of blocks
+    # (reasoning + text), so read the joined text.
+    if response.response_metadata.get("status") == "incomplete":
         raise BadRequestAPIException("Affidavit too long to counter completely")
-    return parse_json_content(response.content, "counter")
+    result = parse_json_content(response.text, "counter")
+    if not result.get("counter_arguments"):
+        # The model explains why in applicable_law_regime (e.g. unreadable scan).
+        raise BadRequestAPIException(
+            result.get("applicable_law_regime") or "No paragraphs could be read from the affidavit"
+        )
+    return result

@@ -23,7 +23,7 @@ def test_detect_case_returns_matched_category(mock_llm_service):
     )
 
     response = client.post(
-        "/detection/detect-case",
+        "/ai/detection/detect-case",
         json={"query": "My landlord is refusing to return my security deposit."},
     )
 
@@ -41,7 +41,7 @@ def test_detect_case_no_match_falls_back_to_other(mock_llm_service):
         {"categoryId": None, "subCategoryId": None}
     )
 
-    response = client.post("/detection/detect-case", json={"query": "What's the weather today?"})
+    response = client.post("/ai/detection/detect-case", json={"query": "What's the weather today?"})
 
     assert response.status_code == 200
     body = response.json()
@@ -60,6 +60,6 @@ def test_detect_case_unknown_id_returns_400(mock_llm_service):
         {"categoryId": "cat_999", "subCategoryId": None}
     )
 
-    response = client.post("/detection/detect-case", json={"query": "some legal issue"})
+    response = client.post("/ai/detection/detect-case", json={"query": "some legal issue"})
 
     assert response.status_code == 400

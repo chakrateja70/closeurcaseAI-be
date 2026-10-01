@@ -26,7 +26,7 @@ def test_query_keeps_only_retrieved_sources(mock_llm, mock_search):
         {"answer": "Khader Basha.", "sources": ["petition.pdf", "invented.pdf"]}
     )
 
-    response = client.post("/case-ingestion/query", json={"case_id": "c1", "query": "father?"})
+    response = client.post("/ai/case-ingestion/query", json={"case_id": "c1", "query": "father?"})
 
     assert response.status_code == 200
     assert response.json()["data"] == {"answer": "Khader Basha.", "sources": ["petition.pdf"]}
@@ -41,7 +41,7 @@ def test_query_not_found_has_no_sources(mock_llm, mock_search):
         {"answer": "Not found in the case documents.", "sources": ["petition.pdf"]}
     )
 
-    response = client.post("/case-ingestion/query", json={"case_id": "c1", "query": "judge?"})
+    response = client.post("/ai/case-ingestion/query", json={"case_id": "c1", "query": "judge?"})
 
     assert response.json()["data"] == {
         "answer": "Not found in the case documents.",
@@ -51,7 +51,7 @@ def test_query_not_found_has_no_sources(mock_llm, mock_search):
 
 @patch("src.services.case_ingestion.search_chunks", new_callable=AsyncMock, return_value=[])
 def test_query_with_no_chunks_skips_llm(mock_search):
-    response = client.post("/case-ingestion/query", json={"case_id": "none", "query": "x"})
+    response = client.post("/ai/case-ingestion/query", json={"case_id": "none", "query": "x"})
 
     assert response.json()["data"] == {
         "answer": "Not found in the case documents.",
