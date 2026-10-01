@@ -14,6 +14,7 @@ class Settings:
         self.SUMMARIZATION_MODEL: str = "gpt-4.1-mini"
         self.DETECTION_MODEL: str = "gpt-4o-mini"
         self.EXTRACTION_MODEL: str = "gpt-4.1-mini"
+        self.COUNTER_GENERATION_MODEL: str = "gpt-5.1"
         self.EMBEDDING_MODEL: str = "text-embedding-3-small"
 
         self.SWAGGER_USERNAME: str = self._get_required("SWAGGER_USERNAME")
