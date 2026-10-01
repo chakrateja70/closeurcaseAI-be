@@ -1,3 +1,9 @@
+import json
+from collections.abc import Iterator
+from contextlib import contextmanager
+from typing import Any
+
+import openai
 from fastapi import HTTPException
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -79,3 +85,28 @@ class GatewayTimeoutAPIException(BaseAPIException):
 
     def __init__(self, error_message: str = "Upstream service timed out"):
         super().__init__(HTTP_504_GATEWAY_TIMEOUT, error_message)
+
+
+@contextmanager
+def openai_errors(model_name: str) -> Iterator[None]:
+    """Map OpenAI SDK errors raised inside the block to API exceptions."""
+    try:
+        yield
+    except openai.RateLimitError as e:
+        raise TooManyRequestsAPIException() from e
+    except openai.BadRequestError as e:
+        raise BadRequestAPIException(str(e)) from e
+    except openai.APITimeoutError as e:
+        raise GatewayTimeoutAPIException() from e
+    except openai.APIConnectionError as e:
+        raise ServiceUnavailableAPIException(f"Could not reach the {model_name} model") from e
+
+
+def parse_json_content(content: Any, model_name: str) -> dict:
+    """Parse a json_object LLM response, rejecting non-string or malformed content."""
+    try:
+        return json.loads(content)
+    except (TypeError, json.JSONDecodeError) as e:
+        raise BadRequestAPIException(
+            f"{model_name.capitalize()} model returned an unexpected response format"
+        ) from e

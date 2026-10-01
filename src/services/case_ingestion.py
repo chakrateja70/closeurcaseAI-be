@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import math
 from datetime import UTC, datetime
@@ -7,15 +6,14 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 import httpx
-import openai
 from langchain_core.language_models import LanguageModelInput
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.core.exceptions import (
     BadRequestAPIException,
-    GatewayTimeoutAPIException,
     ServiceUnavailableAPIException,
-    TooManyRequestsAPIException,
+    openai_errors,
+    parse_json_content,
 )
 from src.db.pinecone import CASES_NAMESPACE, get_index, pinecone_client
 from src.prompts.case_ingestion import (
@@ -55,16 +53,8 @@ async def extract_from_url(client: httpx.AsyncClient, url: str) -> str:
     ]
 
     model = xllm_service.get_case_extraction_model()
-    try:
+    with openai_errors("case extraction"):
         response = await model.ainvoke(messages)
-    except openai.RateLimitError as e:
-        raise TooManyRequestsAPIException() from e
-    except openai.BadRequestError as e:
-        raise BadRequestAPIException(str(e)) from e
-    except openai.APITimeoutError as e:
-        raise GatewayTimeoutAPIException() from e
-    except openai.APIConnectionError as e:
-        raise ServiceUnavailableAPIException("Could not reach the case extraction model") from e
 
     if not isinstance(response.content, str):
         raise BadRequestAPIException("Case extraction model returned an unexpected response format")
@@ -102,16 +92,8 @@ def create_chunks(documents: list[tuple[str, str]]) -> list[tuple[str, str]]:
 
 async def create_embeddings(chunks: list[str]) -> list[list[float]]:
     model = xllm_service.get_embedding_model()
-    try:
+    with openai_errors("embedding"):
         return await model.aembed_documents(chunks)
-    except openai.RateLimitError as e:
-        raise TooManyRequestsAPIException() from e
-    except openai.BadRequestError as e:
-        raise BadRequestAPIException(str(e)) from e
-    except openai.APITimeoutError as e:
-        raise GatewayTimeoutAPIException() from e
-    except openai.APIConnectionError as e:
-        raise ServiceUnavailableAPIException("Could not reach the embedding model") from e
 
 
 def sparse_embed(texts: list[str], input_type: str) -> list[dict]:
@@ -279,21 +261,10 @@ async def answer_query(case_id: str, query: str) -> dict:
         ("user", f"Context:\n{context}\n\nQuestion: {query}"),
     ]
     model = xllm_service.get_case_extraction_model().bind(response_format={"type": "json_object"})
-    try:
+    with openai_errors("answer"):
         response = await model.ainvoke(messages)
-    except openai.RateLimitError as e:
-        raise TooManyRequestsAPIException() from e
-    except openai.BadRequestError as e:
-        raise BadRequestAPIException(str(e)) from e
-    except openai.APITimeoutError as e:
-        raise GatewayTimeoutAPIException() from e
-    except openai.APIConnectionError as e:
-        raise ServiceUnavailableAPIException("Could not reach the answer model") from e
 
-    try:
-        result = json.loads(response.content)
-    except (TypeError, json.JSONDecodeError) as e:
-        raise BadRequestAPIException("Answer model returned an unexpected response format") from e
+    result = parse_json_content(response.content, "answer")
 
     answer = result.get("answer") or NOT_FOUND_ANSWER
     if answer == NOT_FOUND_ANSWER:

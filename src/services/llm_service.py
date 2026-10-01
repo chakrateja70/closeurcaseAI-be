@@ -42,9 +42,7 @@ class LLMService:
         )
 
     @staticmethod
-    def get_counter_generation_model(
-        model: str = xsettings.COUNTER_GENERATION_MODEL
-    ) -> ChatOpenAI:
+    def get_counter_generation_model(model: str = xsettings.COUNTER_GENERATION_MODEL) -> ChatOpenAI:
         """Initialize LLM model for generating counter arguments."""
         return ChatOpenAI(
             model=model,

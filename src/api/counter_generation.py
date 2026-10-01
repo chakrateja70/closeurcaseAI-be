@@ -6,7 +6,7 @@ from src.services.counter_generation import generate_counter
 router = APIRouter(prefix="/counter-generation", tags=["counter-generation"])
 
 
-class ProcessCaseRequest(BaseModel):
+class GenerateCounterRequest(BaseModel):
     url: HttpUrl = Field(description="One affidavit document or image URL")
 
 
@@ -26,8 +26,8 @@ class CounterGenerationResponse(BaseModel):
     data: CounterGeneration
 
 
-@router.post("/process-case", response_model=CounterGenerationResponse)
-async def process_case_request(req: ProcessCaseRequest) -> CounterGenerationResponse:
+@router.post("/generate-counter", response_model=CounterGenerationResponse)
+async def generate_counter_route(req: GenerateCounterRequest) -> CounterGenerationResponse:
     result = await generate_counter(url=str(req.url))
     return CounterGenerationResponse(
         status_code=200, message="Counter generated successfully", data=CounterGeneration(**result)

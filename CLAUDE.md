@@ -57,4 +57,4 @@ Set `SONAR_HOST_URL` / `SONAR_TOKEN` in your environment; never commit them. Fix
 
 - Secrets only via `.env` (git-ignored); never hardcode keys.
 - Line length 100, imports sorted by ruff (`I` rule).
-- LLM calls go through `xllm_service` getters (never instantiate `ChatOpenAI` directly), request structured output with `.bind(response_format={"type": "json_object"})`, and wrap `model.ainvoke(...)` in a `try/except openai.RateLimitError|BadRequestError|APITimeoutError|APIConnectionError` mapped to the `src/core/exceptions.py` classes.
+- LLM calls go through `xllm_service` getters (never instantiate `ChatOpenAI` directly), request structured output with `.bind(response_format={"type": "json_object"})`, wrap `model.ainvoke(...)` in `with openai_errors("<model name>"):` and parse JSON responses with `parse_json_content(...)` (both in `src/core/exceptions.py`) — don't hand-roll the `openai.*Error` mapping.

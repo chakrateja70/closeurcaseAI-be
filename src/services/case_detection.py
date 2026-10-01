@@ -1,14 +1,7 @@
 import json
 from pathlib import Path
 
-import openai
-
-from src.core.exceptions import (
-    BadRequestAPIException,
-    GatewayTimeoutAPIException,
-    ServiceUnavailableAPIException,
-    TooManyRequestsAPIException,
-)
+from src.core.exceptions import BadRequestAPIException, openai_errors, parse_json_content
 from src.prompts.case_detection import build_detection_system_prompt
 from src.services.llm_service import xllm_service
 
@@ -34,20 +27,10 @@ async def detect_case(user_input: str) -> dict:
     ]
 
     model = xllm_service.get_detection_model().bind(response_format={"type": "json_object"})
-    try:
+    with openai_errors("detection"):
         response = await model.ainvoke(messages)
-    except openai.RateLimitError as e:
-        raise TooManyRequestsAPIException() from e
-    except openai.BadRequestError as e:
-        raise BadRequestAPIException(str(e)) from e
-    except openai.APITimeoutError as e:
-        raise GatewayTimeoutAPIException() from e
-    except openai.APIConnectionError as e:
-        raise ServiceUnavailableAPIException("Could not reach the detection model") from e
 
-    if not isinstance(response.content, str):
-        raise BadRequestAPIException("Detection model returned an unexpected response format")
-    result = json.loads(response.content)
+    result = parse_json_content(response.content, "detection")
     category_id = result.get("categoryId")
     subcategory_id = result.get("subCategoryId")
 
