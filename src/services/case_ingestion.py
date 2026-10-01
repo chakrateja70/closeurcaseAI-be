@@ -7,6 +7,7 @@ from urllib.parse import unquote, urlparse
 import httpx
 from langchain_core.language_models import LanguageModelInput
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pinecone.models.inference.embed import SparseEmbedding
 
 from src.core.exceptions import (
     BadRequestAPIException,
@@ -102,8 +103,11 @@ def sparse_embed(texts: list[str], input_type: str) -> list[dict]:
                 inputs=texts[i : i + SPARSE_BATCH_SIZE],
                 parameters={"input_type": input_type, "truncate": "END"},
             )
+            # the sparse model only returns SparseEmbedding; the SDK types it as dense | sparse
             vectors += [
-                {"indices": e.sparse_indices, "values": e.sparse_values} for e in result.data
+                {"indices": e.sparse_indices, "values": e.sparse_values}
+                for e in result.data
+                if isinstance(e, SparseEmbedding)
             ]
     except Exception as e:
         raise ServiceUnavailableAPIException("Could not create sparse embeddings") from e

@@ -53,7 +53,8 @@ class QueryResponse(BaseModel):
 
 @router.post("/ingest-case", response_model=IngestCaseResponse)
 async def ingest_case(req: IngestCaseRequest) -> IngestCaseResponse:
-    await ingest_case_service(case_id=req.case_id, case_text=req.case_text, urls=req.urls)
+    urls = [str(u) for u in req.urls]
+    await ingest_case_service(case_id=req.case_id, case_text=req.case_text, urls=urls)
     return IngestCaseResponse(status_code=200, message="Case ingested successfully")
 
 
