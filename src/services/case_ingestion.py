@@ -29,11 +29,11 @@ SPARSE_BATCH_SIZE = 96  # hosted sparse model's max inputs per request
 UPSERT_BATCH_SIZE = 100  # keeps each request under Pinecone's 2MB limit
 # 1.0 = pure dense (semantic), 0.0 = pure sparse (keyword). Sparse scores run ~5-10x larger
 # than dense cosine, so alpha > 0.5 is needed to balance them. Tune with scripts/eval_retrieval.py
-HYBRID_ALPHA = 0.9
+HYBRID_ALPHA = 0.7
 MIN_DENSE_SIMILARITY = 0.3  # drop matches whose dense cosine similarity is below this
 
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=2000, chunk_overlap=200, length_function=len, is_separator_regex=False
+    chunk_size=1200, chunk_overlap=150, length_function=len, is_separator_regex=False
 )
 
 
@@ -206,7 +206,7 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
     return sum(x * y for x, y in zip(a, b, strict=True)) / norm if norm else 0.0
 
 
-async def search_chunks(query: str, case_id: str, top_k: int = 10) -> list[dict]:
+async def search_chunks(query: str, case_id: str, top_k: int = 7) -> list[dict]:
     """Hybrid search within one case: alpha-weighted dense + sparse, fused server-side.
     Matches whose dense cosine similarity is below MIN_DENSE_SIMILARITY are dropped."""
     dense_vectors, sparse_vectors = await asyncio.gather(
