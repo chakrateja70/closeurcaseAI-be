@@ -37,6 +37,15 @@ ruff-report.json
 .DS_Store
 Thumbs.db
 
-# local demo with real case data - never commit
-scripts/chunk_demo.py
-scripts/eval_retrieval.py
+
+# Local tooling: eval scripts (use real case data), load tests, and their output
+scripts/
+loadtests/
+evaluation_results/
+ragas_input_*.json
+*.log
+locust*.csv
+locust*.html
+
+# Claude Code local settings
+.claude/settings.local.json
