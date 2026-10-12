@@ -19,6 +19,8 @@ class Settings:
         self.EMBEDDING_MODEL: str = "text-embedding-3-small"
 
         # Credits granted per $1 of OpenAI spend, and how many decimals a credit amount keeps.
+        # Our profit: credits charged = OpenAI cost x CREDIT_MARKUP x CREDITS_PER_USD (1.5 = +50%).
+        self.CREDIT_MARKUP: Decimal = Decimal(os.getenv("CREDIT_MARKUP", "1"))
         self.CREDITS_PER_USD: Decimal = Decimal(os.getenv("CREDITS_PER_USD", "1000"))
         self.CREDIT_DECIMALS: int = int(os.getenv("CREDIT_DECIMALS", "6"))
 

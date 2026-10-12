@@ -67,7 +67,7 @@ class Usage(BaseModel):
             for name, n in counts.items():
                 setattr(bucket, name, getattr(bucket, name) + n)
             bucket.cost_usd += cost
-            bucket.credits += cost * xsettings.CREDITS_PER_USD
+            bucket.credits += cost * xsettings.CREDIT_MARKUP * xsettings.CREDITS_PER_USD
             bucket.total_tokens += (
                 counts.get("input_tokens", 0)
                 + counts.get("output_tokens", 0)
