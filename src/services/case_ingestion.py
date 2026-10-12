@@ -22,6 +22,7 @@ from src.prompts.case_ingestion import (
     NOT_FOUND_ANSWER,
 )
 from src.services.llm_service import xllm_service
+from src.services.usage_service import record_embedding_usage
 from src.utils.helper import build_content_parts
 
 SPARSE_MODEL = "pinecone-sparse-english-v0"
@@ -89,7 +90,9 @@ def create_chunks(documents: list[tuple[str, str]]) -> list[tuple[str, str]]:
 async def create_embeddings(chunks: list[str]) -> list[list[float]]:
     model = xllm_service.get_embedding_model()
     with openai_errors("embedding"):
-        return await model.aembed_documents(chunks)
+        vectors = await model.aembed_documents(chunks)
+    record_embedding_usage(model.model, chunks)
+    return vectors
 
 
 def sparse_embed(texts: list[str], input_type: str) -> list[dict]:

@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 
 from dotenv import load_dotenv
 
@@ -16,6 +17,10 @@ class Settings:
         self.EXTRACTION_MODEL: str = "gpt-5.4-mini"
         self.COUNTER_GENERATION_MODEL: str = "gpt-5.1"
         self.EMBEDDING_MODEL: str = "text-embedding-3-small"
+
+        # Credits granted per $1 of OpenAI spend, and how many decimals a credit amount keeps.
+        self.CREDITS_PER_USD: Decimal = Decimal(os.getenv("CREDITS_PER_USD", "1000"))
+        self.CREDIT_DECIMALS: int = int(os.getenv("CREDIT_DECIMALS", "6"))
 
         self.SWAGGER_USERNAME: str = self._get_required("SWAGGER_USERNAME")
         self.SWAGGER_PASSWORD: str = self._get_required("SWAGGER_PASSWORD")

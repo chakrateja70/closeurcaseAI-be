@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
+    HTTP_402_PAYMENT_REQUIRED,
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
@@ -23,6 +24,7 @@ from starlette.status import (
 STATUS_MESSAGES = {
     HTTP_400_BAD_REQUEST: "Bad Request",
     HTTP_401_UNAUTHORIZED: "Unauthorized",
+    HTTP_402_PAYMENT_REQUIRED: "Payment Required",
     HTTP_403_FORBIDDEN: "Forbidden",
     HTTP_404_NOT_FOUND: "Not Found",
     HTTP_409_CONFLICT: "Conflict",
@@ -64,6 +66,13 @@ class BadRequestAPIException(BaseAPIException):
 class UnauthorizedAPIException(BaseAPIException):
     def __init__(self, error_message: str = "Unauthorized"):
         super().__init__(HTTP_401_UNAUTHORIZED, error_message)
+
+
+class InsufficientCreditsAPIException(BaseAPIException):
+    """Caller's credit balance is exhausted; raised before any LLM call is made."""
+
+    def __init__(self, error_message: str = "Insufficient credits"):
+        super().__init__(HTTP_402_PAYMENT_REQUIRED, error_message)
 
 
 class TooManyRequestsAPIException(BaseAPIException):

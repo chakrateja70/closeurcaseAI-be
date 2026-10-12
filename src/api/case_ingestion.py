@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field, HttpUrl, model_validator
 from src.services.case_ingestion import answer_query
 from src.services.case_ingestion import delete_case as delete_case_service
 from src.services.case_ingestion import ingest_case as ingest_case_service
+from src.services.usage_service import TrackedUsage, Usage
 
 router = APIRouter(prefix="/case-ingestion", tags=["case-ingestion"])
 
@@ -33,6 +34,7 @@ class IngestCaseRequest(BaseModel):
 class IngestCaseResponse(BaseModel):
     status_code: int
     message: str
+    usage: Usage | None = None  # only set by LLM-backed endpoints (not delete)
 
 
 class QueryRequest(BaseModel):
@@ -49,19 +51,22 @@ class QueryResponse(BaseModel):
     status_code: int
     message: str
     data: QueryData
+    usage: Usage
 
 
 @router.post("/ingest-case", response_model=IngestCaseResponse)
-async def ingest_case(req: IngestCaseRequest) -> IngestCaseResponse:
+async def ingest_case(req: IngestCaseRequest, usage: TrackedUsage) -> IngestCaseResponse:
     urls = [str(u) for u in req.urls]
     await ingest_case_service(case_id=req.case_id, case_text=req.case_text, urls=urls)
-    return IngestCaseResponse(status_code=200, message="Case ingested successfully")
+    return IngestCaseResponse(status_code=200, message="Case ingested successfully", usage=usage)
 
 
 @router.post("/query", response_model=QueryResponse)
-async def query_case(req: QueryRequest) -> QueryResponse:
+async def query_case(req: QueryRequest, usage: TrackedUsage) -> QueryResponse:
     result = await answer_query(case_id=req.case_id, query=req.query)
-    return QueryResponse(status_code=200, message="Query answered", data=QueryData(**result))
+    return QueryResponse(
+        status_code=200, message="Query answered", data=QueryData(**result), usage=usage
+    )
 
 
 @router.delete("/delete-case/{case_id}", response_model=IngestCaseResponse)

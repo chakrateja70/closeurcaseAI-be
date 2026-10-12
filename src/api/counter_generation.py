@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field, HttpUrl
 
 from src.services.counter_generation import generate_counter
+from src.services.usage_service import TrackedUsage, Usage
 
 router = APIRouter(prefix="/counter-generation", tags=["counter-generation"])
 
@@ -42,11 +43,17 @@ class CounterGenerationResponse(BaseModel):
     status_code: int
     message: str
     data: CounterGeneration
+    usage: Usage
 
 
 @router.post("/generate-counter", response_model=CounterGenerationResponse)
-async def generate_counter_route(req: GenerateCounterRequest) -> CounterGenerationResponse:
+async def generate_counter_route(
+    req: GenerateCounterRequest, usage: TrackedUsage
+) -> CounterGenerationResponse:
     result = await generate_counter(url=str(req.url))
     return CounterGenerationResponse(
-        status_code=200, message="Counter generated successfully", data=CounterGeneration(**result)
+        status_code=200,
+        message="Counter generated successfully",
+        data=CounterGeneration(**result),
+        usage=usage,
     )

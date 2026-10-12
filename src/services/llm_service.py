@@ -3,6 +3,7 @@ from pydantic import SecretStr
 
 from src.config.settings import xsettings
 from src.services.langfuse_service import get_langfuse_callbacks
+from src.services.usage_service import usage_callback
 
 
 class LLMService:
@@ -19,7 +20,7 @@ class LLMService:
             model=model,
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
             model_kwargs={"prompt_cache_key": "case-detection"},
-            callbacks=get_langfuse_callbacks(),
+            callbacks=[usage_callback, *get_langfuse_callbacks()],
         )
 
     @staticmethod
@@ -32,7 +33,7 @@ class LLMService:
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
             max_completion_tokens=max_tokens,
             model_kwargs={"prompt_cache_key": "case-summarization"},
-            callbacks=get_langfuse_callbacks(),
+            callbacks=[usage_callback, *get_langfuse_callbacks()],
         )
 
     @staticmethod
@@ -45,7 +46,7 @@ class LLMService:
             api_key=SecretStr(xsettings.OPENAI_API_KEY),
             max_completion_tokens=max_tokens,
             model_kwargs={"prompt_cache_key": "case-extraction"},
-            callbacks=get_langfuse_callbacks(),
+            callbacks=[usage_callback, *get_langfuse_callbacks()],
         )
 
     @staticmethod
@@ -59,7 +60,7 @@ class LLMService:
             reasoning={"effort": "low", "mode": "standard"},
             verbosity="medium",
             model_kwargs={"prompt_cache_key": "counter-generation"},
-            callbacks=get_langfuse_callbacks(),
+            callbacks=[usage_callback, *get_langfuse_callbacks()],
         )
 
     @staticmethod

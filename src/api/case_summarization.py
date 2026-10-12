@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 from src.services.case_summarization import generate_summary
+from src.services.usage_service import TrackedUsage, Usage
 
 router = APIRouter(prefix="/summarization", tags=["case-summarization"])
 
@@ -15,6 +16,7 @@ class SummarizeCaseResponse(BaseModel):
     status_code: int
     message: str
     data: CaseSummary
+    usage: Usage
 
 
 class SummarizeCaseRequest(BaseModel):
@@ -39,8 +41,11 @@ class SummarizeCaseRequest(BaseModel):
 
 
 @router.post("/summarize-case", response_model=SummarizeCaseResponse)
-async def summarize_case(req: SummarizeCaseRequest):
+async def summarize_case(req: SummarizeCaseRequest, usage: TrackedUsage):
     summary = await generate_summary(case_text=req.case_text, urls=req.urls)
     return SummarizeCaseResponse(
-        status_code=200, message="Case summarized successfully", data=CaseSummary(**summary)
+        status_code=200,
+        message="Case summarized successfully",
+        data=CaseSummary(**summary),
+        usage=usage,
     )
