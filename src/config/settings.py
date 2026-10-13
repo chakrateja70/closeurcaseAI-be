@@ -20,8 +20,8 @@ class Settings:
 
         # Credits granted per $1 of OpenAI spend, and how many decimals a credit amount keeps.
         # Our profit: credits charged = OpenAI cost x CREDIT_MARKUP x CREDITS_PER_USD (1.5 = +50%).
-        self.CREDIT_MARKUP: Decimal = Decimal(os.getenv("CREDIT_MARKUP", "1"))
-        self.CREDITS_PER_USD: Decimal = Decimal(os.getenv("CREDITS_PER_USD", "1000"))
+        self.CREDIT_MARKUP: Decimal = Decimal(os.getenv("CREDIT_MARKUP", "1.002"))
+        self.CREDITS_PER_USD: Decimal = Decimal(os.getenv("CREDITS_PER_USD", "100"))
         self.CREDIT_DECIMALS: int = int(os.getenv("CREDIT_DECIMALS", "6"))
 
         self.SWAGGER_USERNAME: str = self._get_required("SWAGGER_USERNAME")
