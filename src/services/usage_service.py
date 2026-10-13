@@ -40,12 +40,18 @@ class TokenCount(BaseModel):
     total_tokens: int = 0
     cost_usd: Decimal = Decimal(0)
     credits: Decimal = Decimal(0)
+    # credits per bill line (input, cached_input, output, reasoning, embedding); sums to credits
+    credits_breakdown: dict[str, Decimal] = Field(default_factory=dict)
 
     @field_serializer("cost_usd", "credits", when_used="json")
     def _fixed_point(self, value: Decimal, info) -> str:
         # Strings keep exact decimals (no float rounding); credits use the configured precision.
         places = 9 if info.field_name == "cost_usd" else xsettings.CREDIT_DECIMALS
         return f"{value:.{places}f}"
+
+    @field_serializer("credits_breakdown", when_used="json")
+    def _breakdown_fixed_point(self, value: dict[str, Decimal]) -> dict[str, str]:
+        return {k: f"{v:.{xsettings.CREDIT_DECIMALS}f}" for k, v in value.items()}
 
 
 class Usage(BaseModel):
@@ -57,17 +63,28 @@ class Usage(BaseModel):
     def add(self, model: str, **counts: int) -> None:
         price_in, price_cached, price_out = price_for(model)
         cached = counts.get("cached_input_tokens", 0)
-        billable_in = counts.get("input_tokens", 0) + counts.get("embedding_tokens", 0) - cached
-        cost = (
-            billable_in * price_in
-            + cached * price_cached
-            + counts.get("output_tokens", 0) * price_out
-        ) / 1_000_000
+        reasoning = counts.get("reasoning_tokens", 0)
+        # Bill lines in USD. input_tokens includes cached and output_tokens includes reasoning,
+        # so each is split out here; reasoning is billed at the output rate.
+        lines = {
+            "input": (counts.get("input_tokens", 0) - cached) * price_in,
+            "cached_input": cached * price_cached,
+            "output": (counts.get("output_tokens", 0) - reasoning) * price_out,
+            "reasoning": reasoning * price_out,
+            "embedding": counts.get("embedding_tokens", 0) * price_in,
+        }
+        usd_to_credits = xsettings.CREDIT_MARKUP * xsettings.CREDITS_PER_USD
+        cost = sum(lines.values()) / 1_000_000
         for bucket in (self.total, self.by_model.setdefault(model, TokenCount())):
             for name, n in counts.items():
                 setattr(bucket, name, getattr(bucket, name) + n)
             bucket.cost_usd += cost
-            bucket.credits += cost * xsettings.CREDIT_MARKUP * xsettings.CREDITS_PER_USD
+            bucket.credits += cost * usd_to_credits
+            for line, amount in lines.items():
+                bucket.credits_breakdown[line] = (
+                    bucket.credits_breakdown.get(line, Decimal(0))
+                    + amount / 1_000_000 * usd_to_credits
+                )
             bucket.total_tokens += (
                 counts.get("input_tokens", 0)
                 + counts.get("output_tokens", 0)
