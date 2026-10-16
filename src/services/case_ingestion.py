@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import math
 from datetime import UTC, datetime
 from pathlib import Path
@@ -25,6 +26,7 @@ from src.services.llm_service import xllm_service
 from src.services.usage_service import record_embedding_usage
 from src.utils.helper import build_content_parts
 
+CASE_TEXT_NAME = "case_text"  # document name used for inline case_text
 SPARSE_MODEL = "pinecone-sparse-english-v0"
 SPARSE_BATCH_SIZE = 96  # hosted sparse model's max inputs per request
 UPSERT_BATCH_SIZE = 100  # keeps each request under Pinecone's 2MB limit
@@ -77,7 +79,7 @@ async def extract_text(
         ]
 
     if case_text:
-        documents.append(("case_text", case_text))
+        documents.append((CASE_TEXT_NAME, case_text))
 
     return documents
 
@@ -128,6 +130,11 @@ def hybrid_scale(dense: list[float], sparse: dict) -> tuple[list[float], dict]:
     )
 
 
+def chunk_id(case_id: str, doc_name: str, position: int) -> str:
+    digest = hashlib.sha256(doc_name.encode()).hexdigest()[:12]
+    return f"{case_id}-{digest}-{position}"
+
+
 def upsert_case_vectors(
     case_id: str,
     chunks: list[tuple[str, str]],
@@ -137,25 +144,30 @@ def upsert_case_vectors(
     index = get_index()
     now = datetime.now(UTC).isoformat()
     try:
-        # Re-ingest keeps the case's original created_at; only updated_at moves.
-        existing = index.fetch(ids=[f"{case_id}-0"], namespace=CASES_NAMESPACE).vectors
-        first = existing.get(f"{case_id}-0")
-        created_at = (first.metadata or {}).get("created_at", now) if first else now
+        # Extracted text differs run to run, so chunks can't be deduped by content. Re-ingesting a
+        # document (same name) replaces that document's chunks; other documents are kept.
+        for doc_name in dict.fromkeys(name for name, _ in chunks):
+            index.delete(
+                filter={"case_id": {"$eq": case_id}, "document_name": {"$eq": doc_name}},
+                namespace=CASES_NAMESPACE,
+            )
 
+        positions: dict[str, int] = {}
         vectors = []
-        for i, ((doc_name, chunk), dense, sparse) in enumerate(
-            zip(chunks, dense_vectors, sparse_vectors, strict=True)
+        for (doc_name, chunk), dense, sparse in zip(
+            chunks, dense_vectors, sparse_vectors, strict=True
         ):
+            position = positions.get(doc_name, 0)
+            positions[doc_name] = position + 1
             vector = {
-                "id": f"{case_id}-{i}",
+                "id": chunk_id(case_id, doc_name, position),
                 "values": dense,
                 "metadata": {
                     "text": chunk,
                     "case_id": case_id,
-                    "chunk_index": i,
+                    "chunk_index": position,
                     "document_name": doc_name,
-                    "created_at": created_at,
-                    "updated_at": now,
+                    "created_at": now,
                 },
             }
             if sparse["indices"]:  # Pinecone rejects empty sparse vectors
@@ -168,21 +180,44 @@ def upsert_case_vectors(
             batch_size=UPSERT_BATCH_SIZE,
             show_progress=False,
         )
-        # Re-ingest may produce fewer chunks: drop the old tail after the new chunks land.
-        index.delete(
-            filter={"case_id": {"$eq": case_id}, "chunk_index": {"$gte": len(chunks)}},
-            namespace=CASES_NAMESPACE,
-        )
     except Exception as e:
         raise ServiceUnavailableAPIException("Could not upsert vectors to Pinecone") from e
     if response.has_errors:
         raise ServiceUnavailableAPIException("Some vectors failed to upsert to Pinecone")
 
 
+def document_exists(case_id: str, doc_name: str) -> bool:
+    """Chunk 0 always exists for an ingested document (ids are derived from its name)."""
+    chunk_0 = chunk_id(case_id, doc_name, 0)
+    try:
+        return chunk_0 in get_index().fetch(ids=[chunk_0], namespace=CASES_NAMESPACE).vectors
+    except Exception as e:
+        raise ServiceUnavailableAPIException("Could not check existing documents") from e
+
+
 async def ingest_case(
-    case_id: str, case_text: str | None = None, urls: list[str] | None = None
-) -> None:
-    documents = await extract_text(case_text=case_text, urls=urls)
+    case_id: str,
+    case_text: str | None = None,
+    urls: list[str] | None = None,
+    replace: bool = False,
+) -> list[str]:
+    """Returns the names of documents skipped because they were already ingested."""
+    sources = {document_name(u): u for u in urls or []}
+    if case_text:
+        sources[CASE_TEXT_NAME] = case_text
+
+    skipped: list[str] = []
+    if not replace:
+        exists = await asyncio.gather(
+            *(asyncio.to_thread(document_exists, case_id, name) for name in sources)
+        )
+        skipped = [name for name, found in zip(sources, exists, strict=True) if found]
+    new_urls = [u for name, u in sources.items() if name != CASE_TEXT_NAME and name not in skipped]
+    new_text = None if CASE_TEXT_NAME in skipped else case_text
+    if not new_urls and not new_text:
+        return skipped
+
+    documents = await extract_text(case_text=new_text, urls=new_urls)
     chunks = create_chunks(documents)
     if not chunks:
         raise BadRequestAPIException("No text could be extracted from the case")
@@ -191,6 +226,7 @@ async def ingest_case(
         create_embeddings(texts), asyncio.to_thread(sparse_embed, texts, "passage")
     )
     await asyncio.to_thread(upsert_case_vectors, case_id, chunks, dense_vectors, sparse_vectors)
+    return skipped
 
 
 async def delete_case(case_id: str) -> None:

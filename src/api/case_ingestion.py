@@ -22,6 +22,11 @@ class IngestCaseRequest(BaseModel):
         description="Full text of the case (maximum 30,000 characters)",
     )
 
+    replace: bool = Field(
+        default=False,
+        description="Re-ingest documents that already exist for this case (replaces their chunks)",
+    )
+
     @model_validator(mode="after")
     def validate_url_or_case_text(self):
         has_urls = bool(self.urls)
@@ -35,6 +40,7 @@ class IngestCaseResponse(BaseModel):
     status_code: int
     message: str
     usage: Usage | None = None  # only set by LLM-backed endpoints (not delete)
+    skipped: list[str] = []  # documents already ingested for this case (ingest only)
 
 
 class QueryRequest(BaseModel):
@@ -57,8 +63,13 @@ class QueryResponse(BaseModel):
 @router.post("/ingest-case", response_model=IngestCaseResponse)
 async def ingest_case(req: IngestCaseRequest, usage: TrackedUsage) -> IngestCaseResponse:
     urls = [str(u) for u in req.urls]
-    await ingest_case_service(case_id=req.case_id, case_text=req.case_text, urls=urls)
-    return IngestCaseResponse(status_code=200, message="Case ingested successfully", usage=usage)
+    skipped = await ingest_case_service(
+        case_id=req.case_id, case_text=req.case_text, urls=urls, replace=req.replace
+    )
+    message = "Case ingested successfully"
+    if skipped:
+        message = f"Already ingested, skipped: {', '.join(skipped)}"
+    return IngestCaseResponse(status_code=200, message=message, usage=usage, skipped=skipped)
 
 
 @router.post("/query", response_model=QueryResponse)
