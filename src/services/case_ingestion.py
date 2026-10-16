@@ -31,7 +31,7 @@ UPSERT_BATCH_SIZE = 100  # keeps each request under Pinecone's 2MB limit
 # 1.0 = pure dense (semantic), 0.0 = pure sparse (keyword). Sparse scores run ~5-10x larger
 # than dense cosine, so alpha > 0.5 is needed to balance them. Tune with scripts/eval_retrieval.py
 HYBRID_ALPHA = 0.7
-MIN_DENSE_SIMILARITY = 0.3  # drop matches whose dense cosine similarity is below this
+MIN_DENSE_SIMILARITY = 0.2  # drop matches whose dense cosine similarity is below this
 
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=1200, chunk_overlap=150, length_function=len, is_separator_regex=False
